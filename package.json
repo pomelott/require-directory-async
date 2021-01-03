@@ -1,0 +1,39 @@
+{
+  "name": "require-directory-async",
+  "version": "1.0.0-alpha.0",
+  "description": "require a directory asynchronously with import()",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx rollup -c",
+    "test": "npx jest --clearCache && npx jest test/index.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pomelott/require-directory-async.git"
+  },
+  "keywords": [
+    "ts",
+    "typescript",
+    "require",
+    "import",
+    "directory"
+  ],
+  "author": "pomelott",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pomelott/require-directory-async/issues"
+  },
+  "homepage": "https://github.com/pomelott/require-directory-async#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.17",
+    "jest": "^26.6.3",
+    "rollup": "^2.35.1",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.3"
+  }
+}
