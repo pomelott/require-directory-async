@@ -1,18 +1,18 @@
 /// <reference types="node" />
-declare type ExportEsModule = {
+declare type ExportModuleType = {
     [key: string]: any;
     [key: number]: any;
 };
-export declare type DirectoryEsModule = {
-    [key: string]: ExportEsModule | DirectoryEsModule;
+export declare type DirectoryDeepModule = {
+    [key: string]: ExportModuleType | DirectoryDeepModule;
 };
-export declare type LayerEsModule = {
-    [key: string]: ExportEsModule;
+export declare type LayerModule = {
+    [key: string]: ExportModuleType;
 };
 export declare type DirectoryModule = {
-    deepModule: DirectoryEsModule;
-    layerModule: LayerEsModule;
+    deepModule: DirectoryDeepModule;
+    LayerModule: LayerModule;
 };
-declare const _default: (module: NodeModule) => Promise<DirectoryEsModule>;
+declare const _default: (module: NodeModule) => Promise<DirectoryDeepModule>;
 export default _default;
-export declare function importParseDirectory(module: NodeModule): Promise<DirectoryModule>;
+export declare function requireParseDirectory(module: NodeModule, dir: any): Promise<DirectoryModule>;

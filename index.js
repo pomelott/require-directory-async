@@ -1,3 +1,27 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+function _interopNamespace(e) {
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () {
+                        return e[k];
+                    }
+                });
+            }
+        });
+    }
+    n['default'] = e;
+    return Object.freeze(n);
+}
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -62,7 +86,7 @@ function getFilePrefix(filename) {
     }
     return '';
 }
-function initFilePath(baseDir, deepModule, layerModule, prefix) {
+function initFilePath(baseDir, deepModule, LayerModule, prefix) {
     var _this = this;
     /* prefix: the base string of directory  */
     var dir = fs.readdirSync(baseDir);
@@ -82,23 +106,16 @@ function initFilePath(baseDir, deepModule, layerModule, prefix) {
                 else {
                     layerPrefix += item;
                 }
-                initFilePath(targetPath, deepModule[item], layerModule, layerPrefix);
+                initFilePath(targetPath, deepModule[item], LayerModule, layerPrefix);
             }
             else {
                 // filter the default file
                 if (filenamePrefix !== 'index') {
                     layerPrefix += "" + __ + filenamePrefix;
                     pro.push(new Promise(function (resolve, reject) {
-                        // esmodule with import function must return a promise object
-                        import(targetPath).then(function (module) {
-                            if (module.default && Object.keys(module).length === 1) {
-                                deepModule[filenamePrefix] = module.default;
-                                layerModule[layerPrefix] = module.default;
-                            }
-                            else {
-                                deepModule[filenamePrefix] = module;
-                                layerModule[layerPrefix] = module;
-                            }
+                        Promise.resolve().then(function () { return /*#__PURE__*/_interopNamespace(require(targetPath)); }).then(function (module) {
+                            deepModule[filenamePrefix] = module;
+                            LayerModule[layerPrefix] = module;
                             resolve(true);
                         }).catch(function (err) {
                             reject(err);
@@ -111,14 +128,14 @@ function initFilePath(baseDir, deepModule, layerModule, prefix) {
     }); });
     return Promise.all(pro);
 }
-function makeEsModule(rootDir) {
+function makeModule(rootDir) {
     return __awaiter(this, void 0, void 0, function () {
         var esModule;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    esModule = { deepModule: {}, layerModule: {} };
-                    return [4 /*yield*/, initFilePath(rootDir, esModule.deepModule, esModule.layerModule, '')];
+                    esModule = { deepModule: {}, LayerModule: {} };
+                    return [4 /*yield*/, initFilePath(rootDir, esModule.deepModule, esModule.LayerModule, '')];
                 case 1:
                     _a.sent();
                     return [2 /*return*/, esModule];
@@ -133,7 +150,7 @@ var index = (function (module) { return __awaiter(void 0, void 0, void 0, functi
             case 0:
                 directory = module.filename.match(regDir);
                 if (!(directory && directory[0])) return [3 /*break*/, 2];
-                return [4 /*yield*/, makeEsModule(directory[0])];
+                return [4 /*yield*/, makeModule(directory[0])];
             case 1:
                 output = _a.sent();
                 return [2 /*return*/, output.deepModule];
@@ -141,7 +158,7 @@ var index = (function (module) { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); });
-function importParseDirectory(module) {
+function requireParseDirectory(module, dir) {
     return __awaiter(this, void 0, void 0, function () {
         var directory;
         return __generator(this, function (_a) {
@@ -149,16 +166,16 @@ function importParseDirectory(module) {
                 case 0:
                     directory = module.filename.match(regDir);
                     if (!(directory && directory[0])) return [3 /*break*/, 2];
-                    return [4 /*yield*/, makeEsModule(directory[0])];
+                    return [4 /*yield*/, makeModule(directory[0])];
                 case 1: return [2 /*return*/, _a.sent()];
                 case 2: return [2 /*return*/, {
                         deepModule: {},
-                        layerModule: {}
+                        LayerModule: {}
                     }];
             }
         });
     });
 }
 
-export default index;
-export { importParseDirectory };
+exports.default = index;
+exports.requireParseDirectory = requireParseDirectory;

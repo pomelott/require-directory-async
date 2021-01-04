@@ -8,7 +8,7 @@ export default [{
   external: ['path', 'fs'],
   output: {
     file: "index.js",
-    format: 'esm',
+    format: 'cjs',
     exports: 'named'
   },
   plugins: [

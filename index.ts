@@ -3,20 +3,20 @@ const fs = require('fs');
 const __ = path.sep;
 const regDir = new RegExp(`(${__}(?:[^${__}]+${__}?)+)(?=${__}[^${__}]+)`); // get the root path
 
-type ExportEsModule = {
+type ExportModuleType = {
     [key: string]: any;
     [key: number]: any;
 }
-export type DirectoryEsModule = {
-    [key: string]: ExportEsModule | DirectoryEsModule
+export type DirectoryDeepModule = {
+    [key: string]: ExportModuleType | DirectoryDeepModule
 }
-export type LayerEsModule = {
-    [key: string]: ExportEsModule
+export type LayerModule = {
+    [key: string]: ExportModuleType
 }
 
 export type DirectoryModule = {
-    deepModule: DirectoryEsModule;
-    layerModule: LayerEsModule;
+    deepModule: DirectoryDeepModule;
+    LayerModule: LayerModule;
 }
 
 
@@ -28,7 +28,7 @@ function getFilePrefix (filename: string): string {
     return '';
 }
 
-function initFilePath (baseDir: string, deepModule: DirectoryEsModule, layerModule: LayerEsModule, prefix: string) {
+function initFilePath (baseDir: string, deepModule: DirectoryDeepModule, LayerModule: LayerModule, prefix: string) {
     /* prefix: the base string of directory  */
     let dir: string[] = fs.readdirSync(baseDir);
     let pro:Array<Promise<boolean>> = [];
@@ -44,22 +44,16 @@ function initFilePath (baseDir: string, deepModule: DirectoryEsModule, layerModu
             } else {
                 layerPrefix += item;
             }
-            initFilePath(targetPath, deepModule[item], layerModule, layerPrefix)
+            initFilePath(targetPath, deepModule[item], LayerModule, layerPrefix)
         } else {
             // filter the default file
             if (filenamePrefix !== 'index') {
                 layerPrefix += `${__}${filenamePrefix}`;
                 pro.push(
                     new Promise((resolve, reject) => {
-                        // esmodule with import function must return a promise object
                         import(targetPath).then((module) => {
-                            if (module.default && Object.keys(module).length === 1) {
-                                deepModule[filenamePrefix] = module.default;
-                                layerModule[layerPrefix] = module.default;
-                            } else {
-                                deepModule[filenamePrefix] = module;
-                                layerModule[layerPrefix] = module;
-                            }
+                            deepModule[filenamePrefix] = module;
+                            LayerModule[layerPrefix] = module;
                             resolve(true);
                         }).catch((err) => {
                             reject(err);
@@ -71,26 +65,27 @@ function initFilePath (baseDir: string, deepModule: DirectoryEsModule, layerModu
     })
     return Promise.all(pro)
 }
-async function makeEsModule (rootDir: string) {
-    let esModule = {deepModule: {}, layerModule: {}};
-    await initFilePath(rootDir, esModule.deepModule, esModule.layerModule, '')
+async function makeModule (rootDir: string) {
+    let esModule = {deepModule: {}, LayerModule: {}};
+    await initFilePath(rootDir, esModule.deepModule, esModule.LayerModule, '')
     return esModule;
 }
-export default async (module: NodeModule): Promise<DirectoryEsModule> => {
+export default async (module: NodeModule): Promise<DirectoryDeepModule> => {
     let directory = module.filename.match(regDir), output;
     if (directory && directory[0]) {
-        output = await makeEsModule(directory[0]);
+        output = await makeModule(directory[0]);
         return output.deepModule;
     }
     return {}
 }
-export async function importParseDirectory (module: NodeModule): Promise<DirectoryModule> {
+
+export async function requireParseDirectory (module: NodeModule, dir: any): Promise<DirectoryModule> {
     let directory = module.filename.match(regDir);
     if (directory && directory[0]) {
-        return await makeEsModule(directory[0]);
+        return await makeModule(directory[0]);
     }
     return {
         deepModule: {},
-        layerModule: {}
+        LayerModule: {}
     }
 }

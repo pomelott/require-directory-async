@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx rollup -c",
-    "test": "npx jest --clearCache && npx jest test/index.test.ts"
+    "test": "npm run build && npx jest --clearCache && npx jest test/index.test.ts"
   },
   "repository": {
     "type": "git",

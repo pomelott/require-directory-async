@@ -1,11 +1,30 @@
-import { exec } from "child_process"
-
-
-  function sum(a:any, b:any) {
-    return a + b;
-  }
-  describe('', () => {
-    test('test', () => {
-      expect(sum(1,2)).toBe(3)
+  const jsDirPromise = require('./jsDir');
+  describe('unit-test', () => {
+    function basketball () {
+      return 'basketball';
+    }
+    test('requireParseDirectory with js Directory', () => {
+      jsDirPromise.then((msg:any) => {
+        expect(JSON.stringify(msg)).toEqual(JSON.stringify({
+          deepModule: {
+            basketball: {default: basketball},
+            football: {
+              mark: 'football',
+              default: {
+                mark: 'football'
+              }
+            }
+          },
+          LayerModule: {
+            "/basketball": {default: basketball},
+            "/football": {
+              mark: 'football',
+              default: {
+                mark: 'football'
+              }
+            }
+          }
+        }))
+      })
     })
   })
