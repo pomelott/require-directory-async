@@ -1,4 +1,5 @@
 /// <reference types="node" />
+
 declare type ExportModuleType = {
     [key: string]: any;
     [key: number]: any;
@@ -11,8 +12,12 @@ export declare type LayerModule = {
 };
 export declare type DirectoryModule = {
     deepModule: DirectoryDeepModule;
-    LayerModule: LayerModule;
+    layerModule: LayerModule;
 };
-declare const _default: (module: NodeModule) => Promise<DirectoryDeepModule>;
-export default _default;
-export declare function requireParseDirectory(module: NodeModule, dir: any): Promise<DirectoryModule>;
+export declare type RequireDirectoryOpts = {
+    recurse?: boolean;
+    filter?: Function,
+    addPath?: Array<string>
+}
+declare function requireDirectoryAsync(module: NodeModule, opts?: any): Promise<DirectoryModule>;
+export default requireDirectoryAsync;

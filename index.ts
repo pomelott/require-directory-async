@@ -1,25 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const __ = path.sep;
-const regDir = new RegExp(`(${__}(?:[^${__}]+${__}?)+)(?=${__}[^${__}]+)`); // get the root path
-
-type ExportModuleType = {
-    [key: string]: any;
-    [key: number]: any;
-}
-export type DirectoryDeepModule = {
-    [key: string]: ExportModuleType | DirectoryDeepModule
-}
-export type LayerModule = {
-    [key: string]: ExportModuleType
-}
-
-export type DirectoryModule = {
-    deepModule: DirectoryDeepModule;
-    LayerModule: LayerModule;
-}
-
-
+const regDir = new RegExp(`(${__}(?:[^${__}]+${__}?)+)(?=${__}[^${__}]+)`, 'g'); // get the root path
+import _ from 'lodash';
+import {DirectoryDeepModule, DirectoryModule, LayerModule, RequireDirectoryOpts} from './global';
 function getFilePrefix (filename: string): string {
     let matchRes = filename.match(/.*(?=\.[^\.]+)/);
     if (matchRes && matchRes.length) {
@@ -28,7 +12,7 @@ function getFilePrefix (filename: string): string {
     return '';
 }
 
-function initFilePath (baseDir: string, deepModule: DirectoryDeepModule, LayerModule: LayerModule, prefix: string) {
+function initFilePath (baseDir: string, deepModule: DirectoryDeepModule, LayerModule: LayerModule, prefix: string, opts?: RequireDirectoryOpts) {
     /* prefix: the base string of directory  */
     let dir: string[] = fs.readdirSync(baseDir);
     let pro:Array<Promise<boolean>> = [];
@@ -44,20 +28,23 @@ function initFilePath (baseDir: string, deepModule: DirectoryDeepModule, LayerMo
             } else {
                 layerPrefix += item;
             }
-            initFilePath(targetPath, deepModule[item], LayerModule, layerPrefix)
+            if (opts?.recurse) {
+                initFilePath(targetPath, deepModule[item], LayerModule, layerPrefix);
+            }
         } else {
             // filter the default file
             if (filenamePrefix !== 'index') {
                 layerPrefix += `${__}${filenamePrefix}`;
                 pro.push(
                     new Promise((resolve, reject) => {
-                        import(targetPath).then((module) => {
+                        try{
+                            let module = require(targetPath);
                             deepModule[filenamePrefix] = module;
                             LayerModule[layerPrefix] = module;
                             resolve(true);
-                        }).catch((err) => {
-                            reject(err);
-                        })
+                        } catch(err) {
+                            reject(err)
+                        }
                     })
                 )
             }
@@ -65,27 +52,44 @@ function initFilePath (baseDir: string, deepModule: DirectoryDeepModule, LayerMo
     })
     return Promise.all(pro)
 }
-async function makeModule (rootDir: string) {
-    let esModule = {deepModule: {}, LayerModule: {}};
-    await initFilePath(rootDir, esModule.deepModule, esModule.LayerModule, '')
+async function makeModule (rootDir: string, opts?: RequireDirectoryOpts) {
+    let esModule = {deepModule: {}, layerModule: {}};
+    await initFilePath(rootDir, esModule.deepModule, esModule.layerModule, rootDir, opts)
     return esModule;
 }
-export default async (module: NodeModule): Promise<DirectoryDeepModule> => {
-    let directory = module.filename.match(regDir), output;
-    if (directory && directory[0]) {
-        output = await makeModule(directory[0]);
-        return output.deepModule;
+
+async function requireDirectoryAsync (module: NodeModule, opts?: RequireDirectoryOpts): Promise<DirectoryModule> {
+    let directory = module.filename.match(regDir);
+    let resultModule: DirectoryModule, emptyModule = {
+        deepModule: {},
+        layerModule: {}
+    };
+    let defaultOpts = {
+        recurse: true
     }
-    return {}
+    opts = _.merge(defaultOpts, opts);
+    if (directory && directory[0]) {
+        resultModule = await makeModule(directory[0], opts);
+    } else {
+        resultModule = emptyModule;
+    }
+    if (opts) {
+        if (opts.addPath && opts.addPath.length) {
+            await opts.addPath.forEach(async (item: string) => {
+                let addModule: DirectoryModule;
+                if (directory && directory[0]) {
+                    addModule =  await makeModule(path.resolve(directory[0], item), opts);
+                } else {
+                    addModule = emptyModule;
+                }
+                resultModule = _.merge(resultModule, addModule);
+            })
+        }
+        if (opts.filter && typeof opts.filter === 'function') {
+            return opts.filter(resultModule);
+        }
+    }
+    return resultModule;
 }
 
-export async function requireParseDirectory (module: NodeModule, dir: any): Promise<DirectoryModule> {
-    let directory = module.filename.match(regDir);
-    if (directory && directory[0]) {
-        return await makeModule(directory[0]);
-    }
-    return {
-        deepModule: {},
-        LayerModule: {}
-    }
-}
+export default requireDirectoryAsync;

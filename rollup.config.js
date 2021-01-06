@@ -5,11 +5,11 @@ import commonjs from '@rollup/plugin-commonjs';
 
 export default [{
   input: 'index.ts',
-  external: ['path', 'fs'],
+  external: ['path', 'fs', 'lodash'],
   output: {
     file: "index.js",
     format: 'cjs',
-    exports: 'named'
+    exports: 'default'
   },
   plugins: [
     commonjs(),

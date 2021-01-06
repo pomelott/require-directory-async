@@ -1,8 +1,9 @@
 {
   "name": "require-directory-async",
-  "version": "1.0.0-alpha.0",
-  "description": "require a directory asynchronously with import()",
+  "version": "1.0.0",
+  "description": "require a directory asynchronously",
   "main": "index.js",
+  "typings": "global.d.ts",
   "scripts": {
     "build": "npx rollup -c",
     "test": "npm run build && npx jest --clearCache && npx jest test/index.test.ts"
@@ -24,11 +25,14 @@
     "url": "https://github.com/pomelott/require-directory-async/issues"
   },
   "homepage": "https://github.com/pomelott/require-directory-async#readme",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.20"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
     "@types/jest": "^26.0.19",
+    "@types/lodash": "^4.14.167",
     "@types/node": "^14.14.17",
     "jest": "^26.6.3",
     "rollup": "^2.35.1",
