@@ -74,4 +74,4 @@ module.exports = requireDirectoryAsync(module, {
   yarn test
 ```
 
-* for more detail, view `test/`
+* for more detail, such as ts usage, please view `test/`.

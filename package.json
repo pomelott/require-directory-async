@@ -1,6 +1,6 @@
 {
   "name": "require-directory-async",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "require a directory asynchronously",
   "main": "index.js",
   "typings": "global.d.ts",
