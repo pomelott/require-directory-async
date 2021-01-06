@@ -1,6 +1,6 @@
 {
   "name": "require-directory-async",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "require a directory asynchronously",
   "main": "index.js",
   "typings": "global.d.ts",
@@ -13,11 +13,11 @@
     "url": "git+https://github.com/pomelott/require-directory-async.git"
   },
   "keywords": [
-    "ts",
-    "typescript",
     "require",
-    "import",
-    "directory"
+    "directory",
+    "async",
+    "ts",
+    "typescript"
   ],
   "author": "pomelott",
   "license": "MIT",
