@@ -1,6 +1,6 @@
 # require-directory-async
 
-require a directory asynchronously. base function is the same as require-directory.
+require a directory asynchronously.
 
 ## install
 
